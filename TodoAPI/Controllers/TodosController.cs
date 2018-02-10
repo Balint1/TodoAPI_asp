@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoAPI.Models;
+using TodoAPI.Repositories;
+using TodoAPI.ViewModels;
 
 namespace TodoAPI.Controllers
 {
@@ -14,17 +18,29 @@ namespace TodoAPI.Controllers
     public class TodosController : Controller
     {
         private readonly TodoContext _context;
+        private readonly IMapper _mapper;
+        private readonly ITodosRepository _todosRepository;
 
-        public TodosController(TodoContext context)
+        public TodosController(TodoContext context, IMapper mapper,ITodosRepository todosRepository)
         {
             _context = context;
+            _mapper = mapper;
+            _todosRepository = todosRepository;
         }
 
         // GET: api/Todos
         [HttpGet]
-        public IEnumerable<Todo> GetTodos()
+        public async Task<IActionResult> GetTodos()
         {
-            return _context.Todos.Include(todo => todo.Type);
+            //return _mapper.Map<TodoView>(_context.Todos.Include(todo => todo.Type));
+
+            var todos = await _todosRepository.GetTodos();//_context.Todos.Include(todo => todo.Type);
+            var todoViews = new List<TodoView>();
+            foreach (var ttodo in todos)
+            {
+                todoViews.Add(_mapper.Map<TodoView>(ttodo));
+            }
+            return Ok(todoViews);
         }
 
         // GET: api/Todos/5

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TodoAPI.Models;
+using TodoAPI.Repositories;
 
 namespace TodoAPI
 {
@@ -27,7 +29,8 @@ namespace TodoAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
+            services.AddTransient<ITodosRepository, TodosRepository>();
+            services.AddAutoMapper();
             services.AddMvc();
         }
 
