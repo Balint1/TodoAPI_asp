@@ -11,5 +11,8 @@ namespace TodoAPI.Models
         public string Title { get; set; }
         public bool IsDone { get; set; }
         public TodoType Type { get; set; }
+        public DateTime CreationDate { get; set; }
+        public bool Archived { get; set; }
+        public bool Deleted { get; set; }
     }
 }
