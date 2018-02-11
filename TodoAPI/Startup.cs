@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
+using TodoAPI.Services;
 
 namespace TodoAPI
 {
@@ -30,6 +31,7 @@ namespace TodoAPI
         {
             services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddTransient<ITodosRepository, TodosRepository>();
+            services.AddTransient<ITodosService, TodosService>();
             services.AddAutoMapper();
             services.AddMvc();
         }

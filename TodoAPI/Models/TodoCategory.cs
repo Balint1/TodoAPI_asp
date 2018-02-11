@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 
 namespace TodoAPI.Models
 {
-    public class TodoType
+    public class TodoCategory
     {
         public int Id { get; set; }
         public string  Name { get; set; }
+
+        //public System.Drawing.Color Color { get; set; }
     }
 }

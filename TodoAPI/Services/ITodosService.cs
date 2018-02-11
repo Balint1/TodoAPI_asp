@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TodoAPI.Models;
+using TodoAPI.Repositories;
 
-namespace TodoAPI.Repositories
+namespace TodoAPI.Services
 {
-    public interface ITodosRepository
+    public interface ITodosService
     {
         Task<List<Todo>> GetTodos(SortingType sortingType = SortingType.TimeDESC);
         Task<Todo> DeleteTodo(int id);
@@ -18,13 +18,6 @@ namespace TodoAPI.Repositories
         Task<List<Todo>> GetTodos(TodoCategory todoType, SortingType sortingType = SortingType.TimeDESC);
         Task<List<Todo>> GetArchivedTodos(SortingType sortingType = SortingType.TimeDESC);
         Task<List<Todo>> GetDeletedTodos(SortingType sortingType = SortingType.TimeDESC);
-
-
-
-
-
-       
-   
     }
-    public enum SortingType{NameASC,NameDESC,TimeASC,TimeDESC}
+
 }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
+using TodoAPI.Services;
 using TodoAPI.ViewModels;
 
 namespace TodoAPI.Controllers
@@ -19,9 +20,9 @@ namespace TodoAPI.Controllers
     {
         private readonly TodoContext _context;
         private readonly IMapper _mapper;
-        private readonly ITodosRepository _todosRepository;
+        private readonly ITodosService _todosRepository;
 
-        public TodosController(TodoContext context, IMapper mapper,ITodosRepository todosRepository)
+        public TodosController(TodoContext context, IMapper mapper,ITodosService todosRepository)
         {
             _context = context;
             _mapper = mapper;
@@ -32,9 +33,8 @@ namespace TodoAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTodos()
         {
-            //return _mapper.Map<TodoView>(_context.Todos.Include(todo => todo.Type));
 
-            var todos = await _todosRepository.GetTodos();//_context.Todos.Include(todo => todo.Type);
+            var todos = await _todosRepository.GetTodos();
             var todoViews = new List<TodoView>();
             foreach (var ttodo in todos)
             {
@@ -99,13 +99,16 @@ namespace TodoAPI.Controllers
 
         // POST: api/Todos
         [HttpPost]
-        public async Task<IActionResult> PostTodo([FromBody] Todo todo)
+        public async Task<IActionResult> PostTodo([FromBody] TodoView todoView)
         {
+            todoView.Id = 0;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
+            var todo = _mapper.Map<Todo>(todoView);
+            var type = await _context.Types.FirstOrDefaultAsync(t => t.Id.Equals(todoView.Type.Id) && t.Name.Equals(todoView.Type.Name));
+            if (type != null) todo.Type = type;
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
 

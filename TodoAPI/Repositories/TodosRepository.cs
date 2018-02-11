@@ -84,8 +84,9 @@ namespace TodoAPI.Repositories
         public async Task<List<Todo>> GetTodos(SortingType sortingType = SortingType.TimeDESC)
         {
             _logger.LogInformation($"Get Todos sorting by  : {sortingType}");
-            var todos = await _context.Todos.
-                Where(t => t.Deleted == false && t.Archived == false)
+            var todos = await _context.Todos
+                .Include(todo => todo.Type)
+                .Where(t => t.Deleted == false && t.Archived == false)
                 .OrderByDescending(t => t.CreationDate)
                 .ToListAsync();
             if (todos == null)
@@ -110,7 +111,7 @@ namespace TodoAPI.Repositories
             return todos;
         }
 
-        public async Task<List<Todo>> GetTodos(TodoType todoType, SortingType sortingType = SortingType.TimeDESC)
+        public async Task<List<Todo>> GetTodos(TodoCategory todoType, SortingType sortingType = SortingType.TimeDESC)
         {
             _logger.LogInformation($"Get Todos sorting by  : {sortingType} TodoType : {todoType}");
             var todos = await _context.Todos

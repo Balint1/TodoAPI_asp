@@ -33,7 +33,7 @@ namespace TodoAPI.Models
 
         public DbSet<Todo> Todos { get; set; }
 
-        public DbSet<TodoType> Types { get; set; }
+        public DbSet<TodoCategory> Types { get; set; }
 
     }
 }
