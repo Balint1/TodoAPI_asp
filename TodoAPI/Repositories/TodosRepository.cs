@@ -20,6 +20,8 @@ namespace TodoAPI.Repositories
         }
         public async Task<Todo> CreateTodo(Todo todo)
         {
+            var type = await _context.Types.FirstOrDefaultAsync(t => t.Id.Equals(todo.Type.Id));
+            if (type != null) todo.Type = type;
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
             return todo;
@@ -28,12 +30,12 @@ namespace TodoAPI.Repositories
         public async Task<Todo> DeleteTodo(int id)
         {
             _logger.LogInformation($"Deleting Todo : {id}");
-            var todo = await _context.Todos.SingleOrDefaultAsync(m => m.Id == id);
+            var todo = await _context.Todos.SingleOrDefaultAsync(m => m.Id == id );
             if (todo == null) {
                 _logger.LogWarning($"Deleting Todo : {id} Not Found!");
                 return todo;
             }
-            _context.Todos.Remove(todo);
+            todo.Deleted = true;
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Todo : {id} deleted succesfully");
             return todo;
@@ -72,7 +74,7 @@ namespace TodoAPI.Repositories
         public async Task<Todo> GetTodo(int id)
         {
             _logger.LogInformation($"Get Todo Id : {id}");
-            var todo = await _context.Todos.FirstAsync(t => t.Id == id && t.Deleted == false && t.Archived == false);
+            var todo = await _context.Todos.FirstOrDefaultAsync(t => t.Id == id && !t.Deleted );
             if (todo == null)
             {
                 _logger.LogWarning($" Todo Id: {id} Not Found!");
@@ -143,12 +145,12 @@ namespace TodoAPI.Repositories
                 }
                 else
                 {
-                    throw;
+                    throw ;
                 }
             }
         }
 
-        public TodoCategory GetCategoryByName(string categoryName)
+        public TodoCategory FindCategoryByName(string categoryName)
         {
             return _context.Types.FirstOrDefault(t => t.Name.Equals(categoryName));
         }
