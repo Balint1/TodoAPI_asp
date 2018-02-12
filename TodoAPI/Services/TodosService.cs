@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoAPI.Exceptions;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
 
@@ -50,9 +51,11 @@ namespace TodoAPI.Services
             return await _todoRepository.GetTodos(done, sortingType);
         }
 
-        async Task<List<Todo>> ITodosService.GetTodos(TodoCategory todoType, SortingType sortingType)
+        async Task<List<Todo>> ITodosService.GetTodos(string todoType, SortingType sortingType)
         {
-            return await _todoRepository.GetTodos(todoType, sortingType);
+            TodoCategory todoCategory = _todoRepository.GetCategoryByName(todoType);
+            if (todoCategory == null) throw new CategoryNotFoundException("Nem található ilyen kategória");
+            return await _todoRepository.GetTodos(todoCategory, sortingType);
         }
 
         async Task<Todo> ITodosService.UpdateTodo(int id, Todo todo)

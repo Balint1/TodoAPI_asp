@@ -13,9 +13,9 @@ namespace TodoAPI.Controllers
         public DomainProfile()
         {
             CreateMap<Todo, TodoView>();
-            CreateMap<TodoCategory, TodoTypeView>();
+            CreateMap<TodoCategory, TodoCategoryView>();
             CreateMap<TodoView, Todo>();
-            CreateMap<TodoTypeView, TodoCategory>();
+            CreateMap<TodoCategoryView, TodoCategory>();
         }
     }
 }

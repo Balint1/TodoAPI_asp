@@ -14,7 +14,7 @@ namespace TodoAPI.ViewModels
         [StringLength(30)]
         public string Title { get; set; }
         public bool IsDone { get; set; }
-        public TodoTypeView Type { get; set; }
+        public TodoCategoryView Type { get; set; }
         public DateTime CreationDate { get; set; }
     }
 }

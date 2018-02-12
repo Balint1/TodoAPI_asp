@@ -15,7 +15,7 @@ namespace TodoAPI.Services
         Task<Todo> UpdateTodo(int id, Todo todo);
         Task<Todo> GetTodo(int id);
         Task<List<Todo>> GetTodos(bool done, SortingType sortingType = SortingType.TimeDESC);
-        Task<List<Todo>> GetTodos(TodoCategory todoType, SortingType sortingType = SortingType.TimeDESC);
+        Task<List<Todo>> GetTodos(string todoType, SortingType sortingType = SortingType.TimeDESC);
         Task<List<Todo>> GetArchivedTodos(SortingType sortingType = SortingType.TimeDESC);
         Task<List<Todo>> GetDeletedTodos(SortingType sortingType = SortingType.TimeDESC);
     }

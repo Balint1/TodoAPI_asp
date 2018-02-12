@@ -18,13 +18,15 @@ namespace TodoAPI.Repositories
         Task<List<Todo>> GetTodos(TodoCategory todoType, SortingType sortingType = SortingType.TimeDESC);
         Task<List<Todo>> GetArchivedTodos(SortingType sortingType = SortingType.TimeDESC);
         Task<List<Todo>> GetDeletedTodos(SortingType sortingType = SortingType.TimeDESC);
+        TodoCategory GetCategoryByName(string categoryName);
 
 
 
 
 
-       
-   
+
+
+
     }
     public enum SortingType{NameASC,NameDESC,TimeASC,TimeDESC}
 }

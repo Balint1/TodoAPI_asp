@@ -115,7 +115,7 @@ namespace TodoAPI.Repositories
         {
             _logger.LogInformation($"Get Todos sorting by  : {sortingType} TodoType : {todoType}");
             var todos = await _context.Todos
-                .Where(t => t.Type == todoType)
+                .Where(t => t.Type.Equals(todoType))
                 .OrderByDescending(t => t.CreationDate)
                 .ToListAsync();
             if (todos == null)
@@ -146,6 +146,11 @@ namespace TodoAPI.Repositories
                     throw;
                 }
             }
+        }
+
+        public TodoCategory GetCategoryByName(string categoryName)
+        {
+            return _context.Types.FirstOrDefault(t => t.Name.Equals(categoryName));
         }
         private bool TodoExists(int id)
         {

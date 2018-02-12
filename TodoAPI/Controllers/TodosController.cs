@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TodoAPI.Exceptions;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
 using TodoAPI.Services;
@@ -20,31 +21,54 @@ namespace TodoAPI.Controllers
     {
         private readonly TodoContext _context;
         private readonly IMapper _mapper;
-        private readonly ITodosService _todosRepository;
+        private readonly ITodosService _todosService;
+        private readonly ITodosRepository _todosrepo;
 
-        public TodosController(TodoContext context, IMapper mapper,ITodosService todosRepository)
+        public TodosController(TodoContext context, IMapper mapper,ITodosService todosService, ITodosRepository todosRepository)
         {
             _context = context;
             _mapper = mapper;
-            _todosRepository = todosRepository;
+            _todosService = todosService;
+            _todosrepo = todosRepository;
         }
 
         // GET: api/Todos
         [HttpGet]
-        public async Task<IActionResult> GetTodos()
+        public async Task<IActionResult> GetTodos([FromQuery] string category,[FromQuery] bool archived)
+        {
+            List<Todo> todos;
+
+            if(category != null)
+            {
+                try
+                {
+                    todos = await _todosService.GetTodos(category);
+                }
+                catch (CategoryNotFoundException e)
+                {
+                    return BadRequest(e.Message);
+                }
+            }
+            else
+                if(archived)
+                {
+                    todos= await _todosService.GetArchivedTodos();
+                }
+                else
+                    todos = await _todosService.GetTodos();
+            return Ok(mapTodoToTodoView(todos));
+        }
+        // GET: api/Todos/true
+        [HttpGet("{done:bool}")]
+        public async Task<IActionResult> GetTodos(bool done)
         {
 
-            var todos = await _todosRepository.GetTodos();
-            var todoViews = new List<TodoView>();
-            foreach (var ttodo in todos)
-            {
-                todoViews.Add(_mapper.Map<TodoView>(ttodo));
-            }
-            return Ok(todoViews);
+            var todos = await _todosService.GetTodos(done);
+            return Ok(mapTodoToTodoView(todos));
         }
 
         // GET: api/Todos/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetTodo([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -139,6 +163,15 @@ namespace TodoAPI.Controllers
         private bool TodoExists(int id)
         {
             return _context.Todos.Any(e => e.Id == id);
+        }
+        private List<TodoView> mapTodoToTodoView(IEnumerable<Todo> todos)
+        {
+            var todoViews = new List<TodoView>();
+            foreach (var todo in todos)
+            {
+                todoViews.Add(_mapper.Map<TodoView>(todo));
+            }
+            return todoViews;
         }
     }
 }
