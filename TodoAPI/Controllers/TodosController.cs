@@ -20,14 +20,12 @@ namespace TodoAPI.Controllers
     [Route("api/Todos")]
     public class TodosController : Controller
     {
-        private readonly TodoContext _context;
         private readonly IMapper _mapper;
         private readonly ITodosService _todosService;
-        private readonly ILogger<TodosRepository> _logger;
+        private readonly ILogger<TodosController> _logger;
 
-        public TodosController(TodoContext context, IMapper mapper, ITodosService todosService, ILogger<TodosRepository> logger)
+        public TodosController(IMapper mapper, ITodosService todosService, ILogger<TodosController> logger)
         {
-            _context = context;
             _mapper = mapper;
             _todosService = todosService;
             _logger = logger;
@@ -43,7 +41,7 @@ namespace TodoAPI.Controllers
             {
                 try
                 {
-                    todos = await _todosService.GetTodos(category);
+                    todos = await _todosService.GetTodos(category,SortingType.TimeDESC);
                 }
                 catch (CategoryNotFoundException e)
                 {
@@ -57,7 +55,8 @@ namespace TodoAPI.Controllers
                 }
                 else
                     todos = await _todosService.GetTodos();
-            return Ok(mapTodoToTodoView(todos));
+            IActionResult res = Ok(mapTodoToTodoView(todos));
+            return res;
         }
         // GET: api/Todos/true
         [HttpGet("{done:bool}")]
@@ -145,10 +144,6 @@ namespace TodoAPI.Controllers
             return Ok(todoView);
         }
 
-        private bool TodoExists(int id)
-        {
-            return _context.Todos.Any(e => e.Id == id);
-        }
         private List<TodoView> mapTodoToTodoView(IEnumerable<Todo> todos)
         {
             var todoViews = new List<TodoView>();
