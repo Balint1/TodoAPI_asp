@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TodoAPI.Exceptions;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
@@ -22,22 +23,22 @@ namespace TodoAPI.Controllers
         private readonly TodoContext _context;
         private readonly IMapper _mapper;
         private readonly ITodosService _todosService;
-        private readonly ITodosRepository _todosrepo;
+        private readonly ILogger<TodosRepository> _logger;
 
-        public TodosController(TodoContext context, IMapper mapper,ITodosService todosService, ITodosRepository todosRepository)
+        public TodosController(TodoContext context, IMapper mapper, ITodosService todosService, ILogger<TodosRepository> logger)
         {
             _context = context;
             _mapper = mapper;
             _todosService = todosService;
-            _todosrepo = todosRepository;
+            _logger = logger;
         }
 
         // GET: api/Todos
         [HttpGet]
         public async Task<IActionResult> GetTodos([FromQuery] string category,[FromQuery] bool archived)
         {
+            _logger.LogInformation($"GET todos category : {category} archived : {archived}");
             List<Todo> todos;
-
             if(category != null)
             {
                 try
@@ -62,7 +63,7 @@ namespace TodoAPI.Controllers
         [HttpGet("{done:bool}")]
         public async Task<IActionResult> GetTodos(bool done)
         {
-
+            _logger.LogInformation($"GET Done todos ");
             var todos = await _todosService.GetTodos(done);
             return Ok(mapTodoToTodoView(todos));
         }
@@ -71,6 +72,7 @@ namespace TodoAPI.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetTodo([FromRoute] int id)
         {
+            _logger.LogInformation($"GET todo Id : {id}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -90,6 +92,7 @@ namespace TodoAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTodo([FromRoute] int id, [FromBody] TodoView todoView)
         {
+            _logger.LogInformation($"UPDATE todo Id : {id}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -109,11 +112,14 @@ namespace TodoAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> PostTodo([FromBody] TodoView todoView)
         {
+            _logger.LogInformation($"POST todo");
+            if (todoView == null) return BadRequest();
             todoView.Id = 0;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
             var todo = _mapper.Map<Todo>(todoView);
             todo = await _todosService.CreateTodo(todo);
             todoView = _mapper.Map<TodoView>(todo);
@@ -124,6 +130,7 @@ namespace TodoAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodo([FromRoute] int id)
         {
+            _logger.LogInformation($"DELETE todo Id : {id}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
