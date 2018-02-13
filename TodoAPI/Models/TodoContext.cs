@@ -19,6 +19,8 @@ namespace TodoAPI.Models
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
+            modelBuilder.Entity<Todo>().HasQueryFilter(p => !p.Deleted && !p.Archived);
             modelBuilder.Entity<Todo>()
                 .Property(t => t.Archived)
                 .HasDefaultValue(false);
@@ -28,6 +30,7 @@ namespace TodoAPI.Models
             modelBuilder.Entity<Todo>()
                .Property(t => t.CreationDate)
                .HasDefaultValueSql("GETDATE()");
+            base.OnModelCreating(modelBuilder);
         }
 
 

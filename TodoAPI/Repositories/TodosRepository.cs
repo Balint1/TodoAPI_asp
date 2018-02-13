@@ -31,7 +31,10 @@ namespace TodoAPI.Repositories
         public async Task<Todo> DeleteTodo(int id)
         {
             _logger.LogDebug($"Deleting Todo : {id}");
-            var todo = await _context.Todos.Include(t => t.Type).SingleOrDefaultAsync(m => m.Id == id );
+            var todo = await _context.Todos
+                .IgnoreQueryFilters()
+                .Include(t => t.Type)
+                .SingleOrDefaultAsync(m => m.Id == id );
             if (todo == null) {
                 _logger.LogWarning($"Deleting Todo : {id} Not Found!");
                 return todo;
@@ -46,7 +49,8 @@ namespace TodoAPI.Repositories
         {
             var todos = await _context.Todos
                 .Include(todo => todo.Type)
-                .Where(t => t.Archived == true && t.Deleted == false)
+                .IgnoreQueryFilters()
+                .Where(t => t.Archived && !t.Deleted)
                 .OrderByDescending(t => t.CreationDate)
                 .ToListAsync();
             if (todos == null)
@@ -61,6 +65,7 @@ namespace TodoAPI.Repositories
         public async Task<List<Todo>> GetDeletedTodos(SortingType sortingType = SortingType.TimeDESC)
         {
             var todos = await _context.Todos
+                .IgnoreQueryFilters()
                 .Where(t => t.Deleted == true)
                 .OrderByDescending(t => t.CreationDate)
                 .ToListAsync();
@@ -76,8 +81,10 @@ namespace TodoAPI.Repositories
         public async Task<Todo> GetTodo(int id)
         {
             var todo = await _context.Todos
+                .IgnoreQueryFilters()
+                .Where(t => !t.Deleted)
                 .Include(t => t.Type)
-                .FirstOrDefaultAsync(t => t.Id == id && !t.Deleted );
+                .FirstOrDefaultAsync(t => t.Id == id);
             if (todo == null)
             {
                 _logger.LogWarning($" Todo Id: {id} Not Found!");
@@ -91,7 +98,6 @@ namespace TodoAPI.Repositories
         {
             var todos = await _context.Todos
                 .Include(todo => todo.Type)
-                .Where(t => t.Deleted == false && t.Archived == false)
                 .OrderByDescending(t => t.CreationDate)
                 .ToListAsync();
             if (todos == null)
@@ -105,7 +111,8 @@ namespace TodoAPI.Repositories
 
         public async Task<List<Todo>> GetTodos(bool done, SortingType sortingType = SortingType.TimeDESC)
         {
-            var todos = await _context.Todos.Where(t => t.IsDone == done && t.Deleted == false && t.Archived == false)
+            var todos = await _context.Todos
+                .Where(t => t.IsDone == done)
                 .Include(todo => todo.Type)
                 .OrderByDescending(t => t.CreationDate)
                 .ToListAsync();

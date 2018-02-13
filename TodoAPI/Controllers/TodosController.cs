@@ -55,8 +55,8 @@ namespace TodoAPI.Controllers
                 }
                 else
                     todos = await _todosService.GetTodos();
-            IActionResult res = Ok(mapTodoToTodoView(todos));
-            return res;
+            var res = _mapper.Map<List<TodoView>>(todos);
+            return Ok(res);
         }
         // GET: api/Todos/true
         [HttpGet("{done:bool}")]
@@ -64,7 +64,7 @@ namespace TodoAPI.Controllers
         {
             _logger.LogInformation($"GET Done todos ");
             var todos = await _todosService.GetTodos(done);
-            return Ok(mapTodoToTodoView(todos));
+            return Ok(_mapper.Map<List<TodoView>>(todos));
         }
 
         // GET: api/Todos/5
@@ -144,14 +144,6 @@ namespace TodoAPI.Controllers
             return Ok(todoView);
         }
 
-        private List<TodoView> mapTodoToTodoView(IEnumerable<Todo> todos)
-        {
-            var todoViews = new List<TodoView>();
-            foreach (var todo in todos)
-            {
-                todoViews.Add(_mapper.Map<TodoView>(todo));
-            }
-            return todoViews;
-        }
+      
     }
 }
