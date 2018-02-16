@@ -5,19 +5,19 @@ using System.Threading.Tasks;
 
 namespace TodoAPI.Exceptions
 {
-    public class CategoryNotFoundException : Exception
+    public class CategoryNotFoundException : MvcException
     {
         public CategoryNotFoundException()
         {
         }
 
-        public CategoryNotFoundException(string message)
-            : base(message)
+        public CategoryNotFoundException(int httpErrorCode,string message)
+            : base(httpErrorCode,message)
         {
         }
 
-        public CategoryNotFoundException(string message, Exception inner)
-            : base(message, inner)
+        public CategoryNotFoundException(int httpErrorCode,string message, Exception inner)
+            : base(httpErrorCode,message, inner)
         {
         }
     }

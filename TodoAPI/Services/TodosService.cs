@@ -54,7 +54,10 @@ namespace TodoAPI.Services
         async Task<List<Todo>> ITodosService.GetTodos(string todoType, SortingType sortingType)
         {
             TodoCategory todoCategory = _todoRepository.FindCategoryByName(todoType);
-            if (todoCategory == null) throw new CategoryNotFoundException("Nem található ilyen kategória");
+            if (todoCategory == null) {
+            var ex = new CategoryNotFoundException(404,"Nem található ilyen kategória");
+                throw ex;
+            }
             return await _todoRepository.GetTodos(todoCategory, sortingType);
         }
 

@@ -31,6 +31,8 @@ namespace TodoAPI.Controllers
             _logger = logger;
         }
 
+       
+
         // GET: api/Todos
         [HttpGet]
         public async Task<IActionResult> GetTodos([FromQuery] string category,[FromQuery] bool archived)
@@ -39,14 +41,14 @@ namespace TodoAPI.Controllers
             List<Todo> todos;
             if(category != null)
             {
-                try
-                {
                     todos = await _todosService.GetTodos(category,SortingType.TimeDESC);
-                }
-                catch (CategoryNotFoundException e)
-                {
-                    return BadRequest(e.Message);
-                }
+                //try
+                //{
+                //}
+                //catch (CategoryNotFoundException e)
+                //{
+                //    return BadRequest(e.Message);
+                //}
             }
             else
                 if(archived)
@@ -72,10 +74,7 @@ namespace TodoAPI.Controllers
         public async Task<IActionResult> GetTodo([FromRoute] int id)
         {
             _logger.LogInformation($"GET todo Id : {id}");
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            
 
             var todo = await _todosService.GetTodo(id);// _context.Todos.SingleOrDefaultAsync(m => m.Id == id);
 
@@ -92,10 +91,6 @@ namespace TodoAPI.Controllers
         public async Task<IActionResult> PutTodo([FromRoute] int id, [FromBody] TodoView todoView)
         {
             _logger.LogInformation($"UPDATE todo Id : {id}");
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
             if (id != todoView.Id)
             {
@@ -114,11 +109,6 @@ namespace TodoAPI.Controllers
             _logger.LogInformation($"POST todo");
             if (todoView == null) return BadRequest();
             todoView.Id = 0;
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            
             var todo = _mapper.Map<Todo>(todoView);
             todo = await _todosService.CreateTodo(todo);
             todoView = _mapper.Map<TodoView>(todo);
@@ -130,10 +120,7 @@ namespace TodoAPI.Controllers
         public async Task<IActionResult> DeleteTodo([FromRoute] int id)
         {
             _logger.LogInformation($"DELETE todo Id : {id}");
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            
 
             var todo = await _todosService.DeleteTodo(id);
             if (todo == null)

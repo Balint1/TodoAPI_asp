@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using TodoAPI.Filters;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
 using TodoAPI.Services;
@@ -34,7 +35,13 @@ namespace TodoAPI
             services.AddTransient<ITodosRepository, TodosRepository>();
             services.AddTransient<ITodosService, TodosService>();
             services.AddAutoMapper();
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(new ValidationActionFilter());
+                options.Filters.Add(typeof(ControllerExceptionFilter));
+            }
+            );
+            
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
