@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoMapper.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -31,12 +32,12 @@ namespace ControllerTest
             mockRepo.Setup(repo => repo.GetTodos(SortingType.TimeDESC)).Returns(Task.FromResult(GetTestTodos()));
             
             // Act
-            IActionResult result = await controller.GetTodos(null,false);
+            IActionResult result = await controller.GetTodos("",false);
 
 
             // Assert
             var OkObject = Assert.IsType<OkObjectResult>(result);
-            var todos = Assert.IsAssignableFrom<IEnumerable<TodoView>>(
+            var todos = Assert.IsAssignableFrom<List<TodoView>>(
                OkObject.Value);
             Assert.Equal(3, todos.Count());
             
@@ -65,7 +66,12 @@ namespace ControllerTest
             service = new TodosService(mockRepo.Object);
             mockLogger = new Mock<ILogger<TodosController>>();
             mockMapper = new Mock<IMapper>();
+            var mappings = new MapperConfigurationExpression();
+            mappings.AddProfile<DomainProfile>();
+            Mapper.Initialize(mappings);
+            
             controller = new TodosController(mockMapper.Object, service, mockLogger.Object);
+
             TodoCategory category = new TodoCategory(1, "Bevásárlás", 127); 
             TodoCategory category1 = new TodoCategory(2, "Teendõk", 156565);
 
@@ -89,8 +95,8 @@ namespace ControllerTest
             TodoCategory category = new TodoCategory(1, "Bevásárlás", 127);
             List<Todo> todos = new List<Todo>();
             todos.Add(new Todo(1, "Alma", category));
-            todos.Add(new Todo(1, "Korte", category));
-            todos.Add(new Todo(1, "Szilva", category));
+            todos.Add(new Todo(2, "Korte", category));
+            todos.Add(new Todo(3, "Szilva", category));
             foreach (var todo in todos)
             {
                 todo.Archived = true;

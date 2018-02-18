@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,14 +31,17 @@ namespace TodoAPI.Controllers
             _mapper = mapper;
             _todosService = todosService;
             _logger = logger;
+            var mappings = new MapperConfigurationExpression();
+            mappings.AddProfile<DomainProfile>();
+            Mapper.Initialize(mappings);
         }
 
        
 
         // GET: api/Todos
         [HttpGet]
-        [Route("/api/v1/[controller]/GetAll")]
-        [Route("/api/v1/[controller]")]
+       // [Route("/api/v1/[controller]/GetAll")]
+       // [Route("/api/v1/[controller]")]
         public async Task<IActionResult> GetTodos([FromQuery] string category,[FromQuery] bool archived)
         {
             var user = User;
@@ -67,8 +71,8 @@ namespace TodoAPI.Controllers
         }
 
         // GET: api/Todos/5
-        [Authorize]
-        [ValidateAntiForgeryToken]
+        //[Authorize]
+        //[ValidateAntiForgeryToken]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetTodo([FromRoute] int id)
         {
@@ -102,7 +106,7 @@ namespace TodoAPI.Controllers
         }
 
         // POST: api/Todos
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         public async Task<IActionResult> PostTodo([FromBody] TodoView todoView)
         {

@@ -50,6 +50,7 @@ namespace TodoAPI.Controllers.v1
         }
         
         [HttpPost]
+        //[ValidateAntiForgeryToken]
         [Route("/api/v1/[controller]/Login")]
         public async Task<IActionResult> Login([FromBody] LoginView loginView)
         {
