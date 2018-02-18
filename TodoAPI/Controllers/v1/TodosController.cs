@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ using TodoAPI.ViewModels;
 namespace TodoAPI.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Todos")]
+    [Route("/api/v1/[controller]")]
     public class TodosController : Controller
     {
         private readonly IMapper _mapper;
@@ -35,20 +36,16 @@ namespace TodoAPI.Controllers
 
         // GET: api/Todos
         [HttpGet]
+        [Route("/api/v1/[controller]/GetAll")]
+        [Route("/api/v1/[controller]")]
         public async Task<IActionResult> GetTodos([FromQuery] string category,[FromQuery] bool archived)
         {
+            var user = User;
             _logger.LogInformation($"GET todos category : {category} archived : {archived}");
             List<Todo> todos;
             if(category != null)
             {
                     todos = await _todosService.GetTodos(category,SortingType.TimeDESC);
-                //try
-                //{
-                //}
-                //catch (CategoryNotFoundException e)
-                //{
-                //    return BadRequest(e.Message);
-                //}
             }
             else
                 if(archived)
@@ -70,6 +67,8 @@ namespace TodoAPI.Controllers
         }
 
         // GET: api/Todos/5
+        [Authorize]
+        [ValidateAntiForgeryToken]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetTodo([FromRoute] int id)
         {
@@ -103,6 +102,7 @@ namespace TodoAPI.Controllers
         }
 
         // POST: api/Todos
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostTodo([FromBody] TodoView todoView)
         {
