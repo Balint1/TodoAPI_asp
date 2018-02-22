@@ -16,6 +16,15 @@ namespace TodoAPI.Controllers
             CreateMap<TodoCategory, TodoCategoryView>();
             CreateMap<TodoView, Todo>();
             CreateMap<TodoCategoryView, TodoCategory>();
+            //CreateMap<List<Todo>, List<TodoView> > ();
+            //CreateMap<List<TodoCategory>, List<TodoCategoryView>>();
+            //CreateMap<List<TodoView>, List<Todo>>();
+            //CreateMap< List<TodoCategoryView>, List<TodoCategory>>();
+            //CreateMap<IEnumerable<Todo>, IEnumerable<TodoView>>();
+            //CreateMap<IEnumerable<TodoCategory>, IEnumerable<TodoCategoryView>>();
+            //CreateMap<IEnumerable<TodoView>, IEnumerable<Todo>>();
+            //CreateMap<IEnumerable<TodoCategoryView>, IEnumerable<TodoCategory>>();
         }
     }
 }
+ 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,9 +12,12 @@ namespace TodoAPI.Services
     public class TodosService : ITodosService
     {
         private readonly ITodosRepository _todoRepository;
-        public TodosService(ITodosRepository todoRepository)
+        private readonly ILogger<TodosService> _logger;
+
+        public TodosService(ITodosRepository todoRepository, ILogger<TodosService> logger)
         {
             _todoRepository = todoRepository;
+            _logger = logger;
         }
 
         async Task<Todo> ITodosService.CreateTodo(Todo todo)
@@ -55,7 +59,8 @@ namespace TodoAPI.Services
         {
             TodoCategory todoCategory = _todoRepository.FindCategoryByName(todoType);
             if (todoCategory == null) {
-            var ex = new CategoryNotFoundException(404,"Nem található ilyen kategória");
+            var ex = new CategoryNotFoundException(404,"Nem található ilyen kategória: " + todoType);
+                _logger.LogError($"Nem található ilyen kategória : {todoType}");
                 throw ex;
             }
             return await _todoRepository.GetTodos(todoCategory, sortingType);
@@ -65,5 +70,10 @@ namespace TodoAPI.Services
         {
             return await _todoRepository.UpdateTodo(id, todo);
         }
+        public async Task<List<TodoCategory>> GetCategories()
+        {
+            return await _todoRepository.GetTodoCategories();
+        }
+
     }
 }

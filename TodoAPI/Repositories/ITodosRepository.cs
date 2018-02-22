@@ -20,6 +20,8 @@ namespace TodoAPI.Repositories
         Task<List<Todo>> GetDeletedTodos(SortingType sortingType = SortingType.TimeDESC);
         TodoCategory FindCategoryByName(string categoryName);
 
+        Task<List<TodoCategory>> GetTodoCategories();
+
 
 
 

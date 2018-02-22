@@ -31,9 +31,6 @@ namespace TodoAPI.Controllers
             _mapper = mapper;
             _todosService = todosService;
             _logger = logger;
-            var mappings = new MapperConfigurationExpression();
-            mappings.AddProfile<DomainProfile>();
-            Mapper.Initialize(mappings);
         }
 
        
@@ -58,8 +55,14 @@ namespace TodoAPI.Controllers
                 }
                 else
                     todos = await _todosService.GetTodos();
-            var res = _mapper.Map<List<TodoView>>(todos);
-            return Ok(res);
+
+            //return Ok(_mapper.Map<List<TodoView>>(todos));
+            var todoViews = new List<TodoView>();
+            foreach (var item in todos)
+            {
+                todoViews.Add(_mapper.Map<TodoView>(item));
+            }
+            return Ok(todoViews);
         }
         // GET: api/Todos/true
         [HttpGet("{done:bool}")]
@@ -67,7 +70,13 @@ namespace TodoAPI.Controllers
         {
             _logger.LogInformation($"GET Done todos ");
             var todos = await _todosService.GetTodos(done);
-            return Ok(_mapper.Map<List<TodoView>>(todos));
+            //return Ok(_mapper.Map<IEnumerable<TodoView>>(todos));
+            var todoViews = new List<TodoView>();
+            foreach (var item in todos)
+            {
+                todoViews.Add(_mapper.Map<TodoView>(item));
+            }
+            return Ok(todoViews);
         }
 
         // GET: api/Todos/5
@@ -120,6 +129,7 @@ namespace TodoAPI.Controllers
         }
 
         // DELETE: api/Todos/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodo([FromRoute] int id)
         {

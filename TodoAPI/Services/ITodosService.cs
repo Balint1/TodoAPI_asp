@@ -10,6 +10,7 @@ namespace TodoAPI.Services
     public interface ITodosService
     {
         Task<List<Todo>> GetTodos(SortingType sortingType = SortingType.TimeDESC);
+        Task<List<TodoCategory>> GetCategories();
         Task<Todo> DeleteTodo(int id);
         Task<Todo> CreateTodo(Todo todo);
         Task<Todo> UpdateTodo(int id, Todo todo);

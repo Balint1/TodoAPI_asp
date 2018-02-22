@@ -21,6 +21,7 @@ namespace ControllerTest
         Mock<ITodosRepository> mockRepo = new Mock<ITodosRepository>();
         TodosService service;
         Mock<ILogger<TodosController>> mockLogger;
+        Mock<ILogger<TodosService>> mockServiceLogger;
         Mock<IMapper> mockMapper;
         TodosController controller;
         List<Todo> testTodos = new List<Todo>();
@@ -32,7 +33,7 @@ namespace ControllerTest
             mockRepo.Setup(repo => repo.GetTodos(SortingType.TimeDESC)).Returns(Task.FromResult(GetTestTodos()));
             
             // Act
-            IActionResult result = await controller.GetTodos("",false);
+            IActionResult result = await controller.GetTodos(null,false);
 
 
             // Assert
@@ -47,10 +48,10 @@ namespace ControllerTest
         {
             // Arrange
             init();
-            mockRepo.Setup(repo => repo.GetTodos(true,SortingType.TimeDESC)).Returns(Task.FromResult(GetTestArchivedTodos()));
+            mockRepo.Setup(repo => repo.GetArchivedTodos(SortingType.TimeDESC)).Returns(Task.FromResult(GetTestArchivedTodos()));
 
             // Act
-            IActionResult result = await controller.GetTodos(true);
+            IActionResult result = await controller.GetTodos(null,true);
 
 
             // Assert
@@ -63,13 +64,20 @@ namespace ControllerTest
 
         private void init()
         {
-            service = new TodosService(mockRepo.Object);
             mockLogger = new Mock<ILogger<TodosController>>();
+            mockServiceLogger = new Mock<ILogger<TodosService>>();
+            service = new TodosService(mockRepo.Object,mockServiceLogger.Object);
             mockMapper = new Mock<IMapper>();
-            var mappings = new MapperConfigurationExpression();
-            mappings.AddProfile<DomainProfile>();
-            Mapper.Initialize(mappings);
-            
+            //var mappings = new MapperConfigurationExpression();
+            //mappings.AddProfile<DomainProfile>();
+            //Mapper.Initialize(mappings);
+            Mapper.Initialize(cfg => { 
+                cfg.CreateMap<Todo, TodoView>();
+                cfg.CreateMap<TodoCategory, TodoCategoryView>();
+                cfg.CreateMap<TodoView, Todo>();
+                cfg.CreateMap<TodoCategoryView, TodoCategory>();
+            });
+
             controller = new TodosController(mockMapper.Object, service, mockLogger.Object);
 
             TodoCategory category = new TodoCategory(1, "Bevásárlás", 127); 

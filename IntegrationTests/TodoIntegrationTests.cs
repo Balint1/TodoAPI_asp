@@ -34,7 +34,7 @@ namespace IntegrationTests
 
             var responseString = await response.Content.ReadAsStringAsync();
             var res =
-            "{\"id\":2,\"title\":\"Alma\",\"isDone\":false,\"type\":null,\"creationDate\":\"2018-02-10T11:58:25.2233333\"}";
+            "{\"id\":2,\"title\":\"Sajt\",\"isDone\":false,\"type\":{\"id\":2,\"name\":\"Bevásárlás\",\"argb\":120},\"creationDate\":\"2018-02-11T12:10:24.55\"}";
             //TodoView result = JObject.Parse(responseString).ToObject<TodoView>();
             // Assert
             Assert.Equal(res,responseString);
@@ -65,7 +65,7 @@ namespace IntegrationTests
             var responseString = await response.Content.ReadAsStringAsync();
 
             var beforeArray = JArray.Parse(responseString);
-            var category = new TodoCategoryView { Id=15,Name = "fsadf",Argb = 0 };
+            var category = new TodoCategoryView { Id=3,Name = "TESTCategory", Argb = 120 };
             var todo = new TodoView { Title = "Test", IsDone = false, Type = category };
             JObject todoJSON = (JObject)JToken.FromObject(todo);
             //HttpContent content = new StringContent("{\"title\":\"Alma\",\"isDone\":false,\"type\":{\"id\":15,\"name\":\"fsadf\",\"argb\":0},\"creationDate\":\"2018-02-10T11:58:25.2233333\"}",Encoding.UTF8, "application/json");

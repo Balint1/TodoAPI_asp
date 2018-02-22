@@ -35,11 +35,13 @@ namespace TodoAPI
         public void ConfigureServices(IServiceCollection services)
         {
             var apiPrefix = "api";
-            services.AddDbContext<TodoContext>(options => options.UseSqlServer("Server=DESKTOP-B051CI4;Database=TodoDatabase;Trusted_Connection=True;MultipleActiveResultSets=true"));
+            services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<TodoContext>(options => options.UseSqlServer("Server=DESKTOP-B051CI4;Database=TodoDatabase;Trusted_Connection=True;MultipleActiveResultSets=true"));
+           
             services.AddTransient<ITodosRepository, TodosRepository>();
             services.AddTransient<ITodosService, TodosService>();
             services.AddAutoMapper();
-            services.AddIdentity<ApplicationUser,IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<TodoContext>()
                 .AddDefaultTokenProviders();
             /* services.AddAuthentication(sharedOptions =>
@@ -48,16 +50,16 @@ namespace TodoAPI
                  sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                  // sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
              });*/
-            /* services.ConfigureApplicationCookie(options =>
-             {
-                 // Cookie settings
-                 options.Cookie.HttpOnly = true;
-                 options.Cookie.Expiration = TimeSpan.FromDays(150);
-                 options.LoginPath = "/api/v1/Account/Login"; // If the LoginPath is not set here, ASP.NET Core will default to /Account/Login
-                 options.LogoutPath = "/api/v1/Account/Logout"; // If the LogoutPath is not set here, ASP.NET Core will default to /Account/Logout
-                // options.AccessDeniedPath = "/api/v1/Account/AccessDenied"; // If the AccessDeniedPath is not set here, ASP.NET Core will default to /Account/AccessDenied
-                 options.SlidingExpiration = true;
-             });*/
+            //services.ConfigureApplicationCookie(options =>
+            //{
+            //    // Cookie settings
+            //    options.Cookie.HttpOnly = true;
+            //    options.Cookie.Expiration = TimeSpan.FromDays(150);
+            //    options.LoginPath = "/api/v1/Account/Login"; // If the LoginPath is not set here, ASP.NET Core will default to /Account/Login
+            //    options.LogoutPath = "/api/v1/Account/Logout"; // If the LogoutPath is not set here, ASP.NET Core will default to /Account/Logout
+            //   // options.AccessDeniedPath = "/api/v1/Account/AccessDenied"; // If the AccessDeniedPath is not set here, ASP.NET Core will default to /Account/AccessDenied
+            //    options.SlidingExpiration = true;
+            //});
             services.AddResponseCaching(options =>
             {
                 options.UseCaseSensitivePaths = true;
@@ -66,19 +68,19 @@ namespace TodoAPI
             services.AddAuthorization();
             services.AddMvc(options =>
             {
-      //          options.Conventions.Add(new NameSpaceVersionRoutingConvention(apiPrefix));
+                //options.Conventions.Add(new NameSpaceVersionRoutingConvention(apiPrefix));
                 options.Filters.Add(new ValidationActionFilter());
                 options.Filters.Add(typeof(ControllerExceptionFilter));
             }
             );
-            
+
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
         }
-        
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -99,11 +101,13 @@ namespace TodoAPI
             app.UseAuthentication();
             //app.UseCookieAuthentication()
             app.UseResponseCaching();
-            app.UseMvc();
-            app.Run(async (context) =>
+            app.UseMvc(c =>
             {
-                await context.Response.WriteAsync("MVC does not found anything :(");
+                c.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id:int}");
             });
+
         }
     }
 }

@@ -170,9 +170,24 @@ namespace TodoAPI.Repositories
             _logger.LogDebug($"CategoryName : {categoryName} got succesfully");
             return _context.Types.FirstOrDefault(t => t.Name.Equals(categoryName));
         }
+
+        public async Task<List<TodoCategory>> GetTodoCategories()
+        {
+            var categories = await _context.Types
+                .OrderByDescending(t => t.Name)
+                .ToListAsync();
+            if (categories == null)
+            {
+                _logger.LogWarning("  Zero category found!");
+                return null;
+            }
+            _logger.LogDebug($"Got Categories");
+            return categories;
+        }
         private bool TodoExists(int id)
         {
             return _context.Todos.Any(e => e.Id == id);
         }
+
     }
 }
