@@ -13,6 +13,7 @@ using TodoAPI.ViewModels;
 namespace TodoAPI.Controllers
 {
     [Produces("application/json")]
+    [Authorize]
     //[Route("api/v1/[controller]")]
     public class AccountController : Controller
     {
@@ -29,15 +30,18 @@ namespace TodoAPI.Controllers
             _logger = logger;
         }
         [HttpGet]
-        //[Authorize]
-       // [Route("/api/v1/[controller]/Register")]
+        //[ValidateAntiForgeryToken]
+        //[Authorize(AuthenticationSchemes = "Identity.Application")]
+        [AllowAnonymous]
+        // [Route("/api/v1/[controller]/Register")]
         public IActionResult Register()
         {
             return Ok("sajt");
         }
 
         [HttpPost]
-        [Route("/api/v1/[controller]/Register")]
+        //[ValidateAntiForgeryToken]
+        //[Route("/api/[controller]/Register")]
         public async Task<IActionResult> Register( [FromBody] RegisterView registerView)
         {
             _logger.LogInformation($"Start registration");
@@ -58,8 +62,8 @@ namespace TodoAPI.Controllers
         
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        [AllowAnonymous]
-        [Route("/api/v1/[controller]/Login")]
+        //[AllowAnonymous]
+        //[Route("/api/[controller]/Login")]
         public async Task<IActionResult> Login([FromBody] LoginView loginView)
         {
             _logger.LogInformation($"Start login user: {loginView.Email}");
@@ -75,7 +79,7 @@ namespace TodoAPI.Controllers
             return BadRequest("Sikertelen beelentkezés");
         }
         [HttpPost]
-        [Route("/api/v1/[controller]/Logout")]
+        //[Route("/api/[controller]/Logout")]
         public async Task<IActionResult> Logout()
         {
 
@@ -97,5 +101,19 @@ namespace TodoAPI.Controllers
         //           IsPersistent = isPersistent
         //       }, identity);
         //}
+        [HttpGet]
+        //[ValidateAntiForgeryToken]
+        //[AllowAnonymous]
+        //[Route("/api/[controller]/Login")]
+        public async Task<IActionResult> Login()
+        {
+            return Ok("Rossz felhasználónév");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AccessDenied()
+        {
+            return Ok("Acces denied");
+        }
     }
 }

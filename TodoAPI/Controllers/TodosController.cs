@@ -19,7 +19,7 @@ using TodoAPI.ViewModels;
 namespace TodoAPI.Controllers
 {
     [Produces("application/json")]
-    [Route("/api/v1/[controller]")]
+    //[Route("/api/[controller]")]
     public class TodosController : Controller
     {
         private readonly IMapper _mapper;

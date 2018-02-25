@@ -35,9 +35,9 @@ namespace TodoAPI
         public void ConfigureServices(IServiceCollection services)
         {
             var apiPrefix = "api";
-            services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDbContext<TodoContext>(options => options.UseSqlServer("Server=DESKTOP-B051CI4;Database=TodoDatabase;Trusted_Connection=True;MultipleActiveResultSets=true"));
-           
+            services.AddDbContext<TodoContext>(options => options.UseSqlServer("Server=tcp:tnilab.database.windows.net,1433;Initial Catalog=TodoDb;Persist Security Info=False;User ID=lokter;Password=KhtRt858420;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
             services.AddTransient<ITodosRepository, TodosRepository>();
             services.AddTransient<ITodosService, TodosService>();
             services.AddAutoMapper();
@@ -50,22 +50,27 @@ namespace TodoAPI
                  sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                  // sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
              });*/
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    // Cookie settings
-            //    options.Cookie.HttpOnly = true;
-            //    options.Cookie.Expiration = TimeSpan.FromDays(150);
-            //    options.LoginPath = "/api/v1/Account/Login"; // If the LoginPath is not set here, ASP.NET Core will default to /Account/Login
-            //    options.LogoutPath = "/api/v1/Account/Logout"; // If the LogoutPath is not set here, ASP.NET Core will default to /Account/Logout
-            //   // options.AccessDeniedPath = "/api/v1/Account/AccessDenied"; // If the AccessDeniedPath is not set here, ASP.NET Core will default to /Account/AccessDenied
-            //    options.SlidingExpiration = true;
-            //});
-            services.AddResponseCaching(options =>
+            services.AddAuthentication(options =>
             {
-                options.UseCaseSensitivePaths = true;
-                options.MaximumBodySize = 1024;
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
             });
-            services.AddAuthorization();
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.Cookie.Expiration = TimeSpan.FromDays(150);
+                options.LoginPath = "/Account/Login"; // If the LoginPath is not set here, ASP.NET Core will default to /Account/Login
+                options.LogoutPath = "/Account/Logout"; // If the LogoutPath is not set here, ASP.NET Core will default to /Account/Logout
+               // options.AccessDeniedPath = "/api/v1/Account/AccessDenied"; // If the AccessDeniedPath is not set here, ASP.NET Core will default to /Account/AccessDenied
+                options.SlidingExpiration = true;
+            });
+            //services.AddResponseCaching(options =>
+            //{
+            //    options.UseCaseSensitivePaths = true;
+            //    options.MaximumBodySize = 1024;
+            //});
+            //services.AddAuthorization();
             services.AddMvc(options =>
             {
                 //options.Conventions.Add(new NameSpaceVersionRoutingConvention(apiPrefix));
@@ -99,13 +104,13 @@ namespace TodoAPI
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
             app.UseAuthentication();
-            //app.UseCookieAuthentication()
-            app.UseResponseCaching();
+            //app.UseCookieAuthentication();
+            //app.UseResponseCaching();
             app.UseMvc(c =>
             {
                 c.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id:int}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
         }

@@ -93,7 +93,7 @@ namespace TodoAPI.Repositories
             _logger.LogDebug($"Got Todo Id : {id}");
             return todo;
         }
-
+        
         public async Task<List<Todo>> GetTodos(SortingType sortingType = SortingType.TimeDESC)
         {
             var todos = await _context.Todos
