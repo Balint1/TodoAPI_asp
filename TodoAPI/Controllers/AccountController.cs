@@ -37,7 +37,7 @@ namespace TodoAPI.Controllers
         }
 
         [HttpPost]
-        [Route("/api/v1/[controller]/Register")]
+        //[Route("/api/v1/[controller]/Register")]
         public async Task<IActionResult> Register( [FromBody] RegisterView registerView)
         {
             _logger.LogInformation($"Start registration");

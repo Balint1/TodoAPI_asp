@@ -68,7 +68,7 @@ namespace TodoAPI
             services.AddAuthorization();
             services.AddMvc(options =>
             {
-                //options.Conventions.Add(new NameSpaceVersionRoutingConvention(apiPrefix));
+               // options.Conventions.Add(new NameSpaceVersionRoutingConvention(apiPrefix));
                 options.Filters.Add(new ValidationActionFilter());
                 options.Filters.Add(typeof(ControllerExceptionFilter));
             }
@@ -89,7 +89,7 @@ namespace TodoAPI
                 app.UseDeveloperExceptionPage();
             }
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseStaticFiles();
+           // app.UseStaticFiles();
             app.UseSwagger();
             app.UseETagger();
 

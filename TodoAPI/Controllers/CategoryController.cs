@@ -11,9 +11,10 @@ using TodoAPI.ViewModels;
 namespace TodoAPI.Controllers.v1
 {
     [Produces("application/json")]
-    [Route("/api/v1/[controller]")]
+    //[Route("/api/v1/[controller]")]
     public class CategoryController : Controller
     {
+        
         private readonly IMapper _mapper;
         private readonly ITodosService _todosService;
         private readonly ILogger<TodosController> _logger;

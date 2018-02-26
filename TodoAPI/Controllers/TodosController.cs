@@ -19,7 +19,7 @@ using TodoAPI.ViewModels;
 namespace TodoAPI.Controllers
 {
     [Produces("application/json")]
-    [Route("/api/v1/[controller]")]
+    //[Route("/api/v1/[controller]")]
     public class TodosController : Controller
     {
         private readonly IMapper _mapper;
@@ -129,7 +129,7 @@ namespace TodoAPI.Controllers
         }
 
         // DELETE: api/Todos/5
-        [Authorize]
+       // [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodo([FromRoute] int id)
         {
