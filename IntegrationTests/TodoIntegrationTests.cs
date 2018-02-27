@@ -16,6 +16,7 @@ namespace IntegrationTests
     {
         private readonly TestServer _server;
         private readonly HttpClient _client;
+        private string JWTToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuaHUiLCJqdGkiOiI1YmRhNDNjMi03NzI1LTQ2ZjgtOTZkMy0zNjlkYzJlNjZhNDUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImY4M2JjMThmLWVmNTYtNGFhMS05OTQ0LTgyZDZiZjBhZDUwZiIsImV4cCI6MTUyMjMyMDI5MSwiaXNzIjoibG9jYWxob3N0OjUzMzA5IiwiYXVkIjoibG9jYWxob3N0OjUzMzA5In0.bW33XGu-oXroPKAY8EqJYOWzmFt1kmEx8qs-dMc81Yk";
         public TodoIntegrationTests()
         {
             // Arrange
@@ -29,7 +30,9 @@ namespace IntegrationTests
         public async void GetTodoByIdTest()
         {
             // Act
-            var response = await _client.GetAsync("/api/v1/todos/2");
+            
+            var response = await _client.GetAsync("/api/todos/2");
+
             response.EnsureSuccessStatusCode();
 
             var responseString = await response.Content.ReadAsStringAsync();
@@ -43,7 +46,7 @@ namespace IntegrationTests
         public async void DoneTodosTest()
         {
             // Act
-            var response = await _client.GetAsync("/api/v1/todos/true");
+            var response = await _client.GetAsync("/api/todos/true");
             response.EnsureSuccessStatusCode();
 
             var responseString = await response.Content.ReadAsStringAsync();
@@ -57,8 +60,9 @@ namespace IntegrationTests
         [Fact]
         public async void PostTodoTest()
         {
-            string uriString = "/api/v1/todos/";
+            string uriString = "/api/todos/";
             // Act
+
             var response = await _client.GetAsync(uriString);
             response.EnsureSuccessStatusCode();
 
@@ -70,7 +74,10 @@ namespace IntegrationTests
             JObject todoJSON = (JObject)JToken.FromObject(todo);
             //HttpContent content = new StringContent("{\"title\":\"Alma\",\"isDone\":false,\"type\":{\"id\":15,\"name\":\"fsadf\",\"argb\":0},\"creationDate\":\"2018-02-10T11:58:25.2233333\"}",Encoding.UTF8, "application/json");
             HttpContent content = new StringContent(todoJSON.ToString(),Encoding.UTF8, "application/json");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTToken);
             response = await _client.PostAsync(uriString, content);
+            //response = await _server.CreateRequest(uriString).AddHeader("Authorization", JWTToken).PostAsync();
+
             response.EnsureSuccessStatusCode();
 
             response = await _client.GetAsync(uriString);
@@ -82,6 +89,8 @@ namespace IntegrationTests
 
             // Assert
             Assert.Equal(beforeArray.Count+1, afterArray.Count);
+           // var response = await _server.CreateRequest(uriString).AddHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuaHUiLCJqdGkiOiI1YmRhNDNjMi03NzI1LTQ2ZjgtOTZkMy0zNjlkYzJlNjZhNDUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImY4M2JjMThmLWVmNTYtNGFhMS05OTQ0LTgyZDZiZjBhZDUwZiIsImV4cCI6MTUyMjMyMDI5MSwiaXNzIjoibG9jYWxob3N0OjUzMzA5IiwiYXVkIjoibG9jYWxob3N0OjUzMzA5In0.bW33XGu-oXroPKAY8EqJYOWzmFt1kmEx8qs-dMc81Yk").GetAsync();
+
         }
     }
 }

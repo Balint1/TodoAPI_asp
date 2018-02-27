@@ -10,8 +10,24 @@ using Microsoft.Extensions.Logging;
 using TodoAPI.Models;
 using TodoAPI.ViewModels;
 
-namespace TodoAPI.Controllers
+
+using System.ComponentModel.DataAnnotations;
+
+using System.IdentityModel.Tokens.Jwt;
+
+
+
+using System.Security.Claims;
+
+using System.Text;
+
+
+using Microsoft.Extensions.Configuration;
+
+using Microsoft.IdentityModel.Tokens;
+namespace TodoAPI.v1.Controllers
 {
+    [ApiVersion("1.0")]
     [Produces("application/json")]
     //[Route("api/v1/[controller]")]
     public class AccountController : Controller
@@ -19,21 +35,26 @@ namespace TodoAPI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<AccountController> _logger;
+        private readonly IConfiguration _configuration;
 
         public AccountController(UserManager<ApplicationUser> userManager
             ,SignInManager<ApplicationUser> signInManager
-            ,ILogger<AccountController> logger)
+            ,ILogger<AccountController> logger
+            , IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _configuration = configuration;
+
         }
         [HttpGet]
-        //[Authorize]
-       // [Route("/api/v1/[controller]/Register")]
-        public IActionResult Register()
+        [Authorize]
+        public async Task<IActionResult> Register()
         {
-            return Ok("sajt");
+            var id = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var user = await _userManager.FindByIdAsync(id);
+            return Ok(user);
         }
 
         [HttpPost]
@@ -46,8 +67,11 @@ namespace TodoAPI.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(newUser, false);
+                var appUser = _userManager.Users.SingleOrDefault(r => r.Email == registerView.Email);
+
                 _logger.LogInformation($"User : {newUser.UserName} succesfully registered");
-                return Ok();
+                return Ok(await GenerateJwtToken(registerView.Email, appUser));
+                //return Ok();
             }
             else
             {
@@ -57,9 +81,7 @@ namespace TodoAPI.Controllers
         }
         
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        [AllowAnonymous]
-        [Route("/api/v1/[controller]/Login")]
+        //[AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginView loginView)
         {
             _logger.LogInformation($"Start login user: {loginView.Email}");
@@ -69,13 +91,14 @@ namespace TodoAPI.Controllers
             
             if (result.Succeeded)
             {
+                var appUser = _userManager.Users.SingleOrDefault(r => r.Email == loginView.Email);
                 _logger.LogInformation($"User : {user.UserName} succesfully logged in");
-                return Ok();
+                return Ok(await GenerateJwtToken(loginView.Email, appUser));
+
             }
             return BadRequest("Sikertelen beelentkezés");
         }
         [HttpPost]
-        [Route("/api/v1/[controller]/Logout")]
         public async Task<IActionResult> Logout()
         {
 
@@ -84,18 +107,29 @@ namespace TodoAPI.Controllers
             return Ok();
         }
 
-        //private async Task SignInAsync(ApplicationUser user, bool isPersistent)
-        //{
-        //    AuthenticationManager.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+        private async Task<object> GenerateJwtToken(string email, IdentityUser user)
 
-        //    var identity = await UserManager.CreateIdentityAsync(
-        //       user, DefaultAuthenticationTypes.ApplicationCookie);
+        {
 
-        //    AuthenticationManager.SignIn(
-        //       new AuthenticationProperties()
-        //       {
-        //           IsPersistent = isPersistent
-        //       }, identity);
-        //}
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtExpireDays"]));
+            var token = new JwtSecurityToken(
+                _configuration["JwtIssuer"],
+                _configuration["JwtIssuer"],
+                claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+
+        }
     }
 }

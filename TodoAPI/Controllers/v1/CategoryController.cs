@@ -8,10 +8,11 @@ using Microsoft.Extensions.Logging;
 using TodoAPI.Services;
 using TodoAPI.ViewModels;
 
-namespace TodoAPI.Controllers.v1
+namespace TodoAPI.v1.Controllers.v1
 {
+    [ApiVersion("1.0")]
     [Produces("application/json")]
-    //[Route("/api/v1/[controller]")]
+    [Route("/api/[controller]")]
     public class CategoryController : Controller
     {
         

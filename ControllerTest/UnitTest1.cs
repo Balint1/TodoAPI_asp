@@ -11,6 +11,7 @@ using TodoAPI.Controllers;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
 using TodoAPI.Services;
+using TodoAPI.v1.Controllers;
 using TodoAPI.ViewModels;
 using Xunit;
 
@@ -22,7 +23,7 @@ namespace ControllerTest
         TodosService service;
         Mock<ILogger<TodosController>> mockLogger;
         Mock<ILogger<TodosService>> mockServiceLogger;
-        Mock<IMapper> mockMapper;
+        IMapper mockMapper;
         TodosController controller;
         List<Todo> testTodos = new List<Todo>();
        [Fact]
@@ -67,7 +68,7 @@ namespace ControllerTest
             mockLogger = new Mock<ILogger<TodosController>>();
             mockServiceLogger = new Mock<ILogger<TodosService>>();
             service = new TodosService(mockRepo.Object,mockServiceLogger.Object);
-            mockMapper = new Mock<IMapper>();
+           // mockMapper = new Mock<IMapper>();
             //var mappings = new MapperConfigurationExpression();
             //mappings.AddProfile<DomainProfile>();
             //Mapper.Initialize(mappings);
@@ -77,8 +78,15 @@ namespace ControllerTest
                 cfg.CreateMap<TodoView, Todo>();
                 cfg.CreateMap<TodoCategoryView, TodoCategory>();
             });
+            var config = new AutoMapper.MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new DomainProfile());
+            });
 
-            controller = new TodosController(mockMapper.Object, service, mockLogger.Object);
+            var mapper = config.CreateMapper();
+            mockMapper = mapper ;    
+
+            controller = new TodosController(mockMapper, service, mockLogger.Object);
 
             TodoCategory category = new TodoCategory(1, "Bevásárlás", 127); 
             TodoCategory category1 = new TodoCategory(2, "Teendõk", 156565);

@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using TodoAPI.Controllers;
 using TodoAPI.Filters;
 using TodoAPI.Models;
 using TodoAPI.Repositories;
@@ -24,8 +30,14 @@ namespace TodoAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup()
+
         {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+           .SetBasePath(AppContext.BaseDirectory)
+           //.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+           .AddJsonFile("appsettings.json")
+           .Build();
             Configuration = configuration;
         }
 
@@ -34,9 +46,9 @@ namespace TodoAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var apiPrefix = "api";
+           
+            //Configuration = configuration;
             services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            //services.AddDbContext<TodoContext>(options => options.UseSqlServer("Server=DESKTOP-B051CI4;Database=TodoDatabase;Trusted_Connection=True;MultipleActiveResultSets=true"));
            
             services.AddTransient<ITodosRepository, TodosRepository>();
             services.AddTransient<ITodosService, TodosService>();
@@ -44,31 +56,43 @@ namespace TodoAPI
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<TodoContext>()
                 .AddDefaultTokenProviders();
-            /* services.AddAuthentication(sharedOptions =>
-             {
-                 sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                 sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                 // sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-             });*/
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    // Cookie settings
-            //    options.Cookie.HttpOnly = true;
-            //    options.Cookie.Expiration = TimeSpan.FromDays(150);
-            //    options.LoginPath = "/api/v1/Account/Login"; // If the LoginPath is not set here, ASP.NET Core will default to /Account/Login
-            //    options.LogoutPath = "/api/v1/Account/Logout"; // If the LogoutPath is not set here, ASP.NET Core will default to /Account/Logout
-            //   // options.AccessDeniedPath = "/api/v1/Account/AccessDenied"; // If the AccessDeniedPath is not set here, ASP.NET Core will default to /Account/AccessDenied
-            //    options.SlidingExpiration = true;
-            //});
-            services.AddResponseCaching(options =>
+       
+            // ===== Add Jwt Authentication ========
+
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+
+            services
+
+                .AddAuthentication(options =>
+
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+
+                .AddJwtBearer(cfg =>
+
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = Configuration["JwtIssuer"],
+                        ValidAudience = Configuration["JwtIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtKey"])),
+                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
+                    };
+                });
+            services.AddApiVersioning(options =>
             {
-                options.UseCaseSensitivePaths = true;
-                options.MaximumBodySize = 1024;
+                options.ReportApiVersions = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
             });
-            services.AddAuthorization();
+
             services.AddMvc(options =>
             {
-               // options.Conventions.Add(new NameSpaceVersionRoutingConvention(apiPrefix));
                 options.Filters.Add(new ValidationActionFilter());
                 options.Filters.Add(typeof(ControllerExceptionFilter));
             }
@@ -79,8 +103,8 @@ namespace TodoAPI
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
+            
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -89,7 +113,6 @@ namespace TodoAPI
                 app.UseDeveloperExceptionPage();
             }
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-           // app.UseStaticFiles();
             app.UseSwagger();
             app.UseETagger();
 
@@ -99,13 +122,14 @@ namespace TodoAPI
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
             app.UseAuthentication();
-            //app.UseCookieAuthentication()
-            app.UseResponseCaching();
+           
+
+            //app.UseResponseCaching();
             app.UseMvc(c =>
             {
                 c.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id:int}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
         }

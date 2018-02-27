@@ -16,10 +16,11 @@ using TodoAPI.Repositories;
 using TodoAPI.Services;
 using TodoAPI.ViewModels;
 
-namespace TodoAPI.Controllers
+namespace TodoAPI.v1.Controllers
 {
+    [ApiVersion("1.0")]
     [Produces("application/json")]
-    //[Route("/api/v1/[controller]")]
+    [Route("/api/[controller]")]
     public class TodosController : Controller
     {
         private readonly IMapper _mapper;
@@ -37,7 +38,6 @@ namespace TodoAPI.Controllers
 
         // GET: api/Todos
         [HttpGet]
-       // [Route("/api/v1/[controller]/GetAll")]
        // [Route("/api/v1/[controller]")]
         public async Task<IActionResult> GetTodos([FromQuery] string category,[FromQuery] bool archived)
         {
@@ -56,13 +56,13 @@ namespace TodoAPI.Controllers
                 else
                     todos = await _todosService.GetTodos();
 
-            //return Ok(_mapper.Map<List<TodoView>>(todos));
-            var todoViews = new List<TodoView>();
-            foreach (var item in todos)
-            {
-                todoViews.Add(_mapper.Map<TodoView>(item));
-            }
-            return Ok(todoViews);
+            return Ok(_mapper.Map<List<TodoView>>(todos));
+            //var todoViews = new List<TodoView>();
+            //foreach (var item in todos)
+            //{
+            //    todoViews.Add(_mapper.Map<TodoView>(item));
+            //}
+            //return Ok(todoViews);
         }
         // GET: api/Todos/true
         [HttpGet("{done:bool}")]
@@ -99,6 +99,7 @@ namespace TodoAPI.Controllers
         }
 
         // PUT: api/Todos/5
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTodo([FromRoute] int id, [FromBody] TodoView todoView)
         {
@@ -115,7 +116,7 @@ namespace TodoAPI.Controllers
         }
 
         // POST: api/Todos
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostTodo([FromBody] TodoView todoView)
         {
@@ -129,7 +130,7 @@ namespace TodoAPI.Controllers
         }
 
         // DELETE: api/Todos/5
-       // [Authorize]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodo([FromRoute] int id)
         {
