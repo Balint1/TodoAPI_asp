@@ -49,7 +49,7 @@ namespace TodoAPI
            
             //Configuration = configuration;
             services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-           
+            var alma = Configuration.GetConnectionString("DefaultConnection");
             services.AddTransient<ITodosRepository, TodosRepository>();
             services.AddTransient<ITodosService, TodosService>();
             services.AddAutoMapper();

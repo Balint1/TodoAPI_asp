@@ -11,9 +11,10 @@ using TodoAPI.Models;
 namespace TodoAPI.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    partial class TodoContextModelSnapshot : ModelSnapshot
+    [Migration("20180526154911_query_filter_and_creation_date_added")]
+    partial class query_filter_and_creation_date_added
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -31,6 +31,9 @@ namespace TodoAPI.Models
             modelBuilder.Entity<Todo>()
                .Property(t => t.CreationDate)
                .HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<Todo>()
+            .Property(t => t.UpperTitle)
+            .HasComputedColumnSql("dbo.func([Title])");
             base.OnModelCreating(modelBuilder);
         }
 

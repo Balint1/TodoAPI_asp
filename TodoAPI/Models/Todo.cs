@@ -27,6 +27,8 @@ namespace TodoAPI.Models
         public DateTime CreationDate { get; set; }
         public bool Archived { get; set; }
         public bool Deleted { get; set; }
+
+        public string UpperTitle { get; set; }
     }
     
     }
